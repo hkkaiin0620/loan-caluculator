@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ローン計算機">
+  <title>一括返済ローン計算機</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 20px 16px 40px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 32px 24px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      color: #1a2233;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #7a8599;
+      font-size: 0.85rem;
+      margin-bottom: 28px;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #3a4560;
+      margin-bottom: 6px;
+    }
+
+    .input-wrap {
+      display: flex;
+      align-items: stretch;
+      border: 1.5px solid #d1d9e6;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .input-wrap:focus-within {
+      border-color: #4f7ef8;
+    }
+
+    input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 14px 14px;
+      /* iPhoneの自動ズームを防ぐため16px以上 */
+      font-size: 16px;
+      color: #1a2233;
+      background: transparent;
+      -webkit-appearance: none;
+      appearance: none;
+      min-height: 50px;
+    }
+
+    input[type="date"] {
+      padding: 14px 14px;
+      width: 100%;
+      min-height: 50px;
+      /* iPhoneのdate inputスタイル調整 */
+      -webkit-appearance: none;
+    }
+
+    .unit {
+      padding: 0 14px;
+      color: #7a8599;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      background: #f7f9fc;
+      border-left: 1.5px solid #d1d9e6;
+      display: flex;
+      align-items: center;
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      background: #4f7ef8;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      min-height: 52px;
+      transition: background 0.15s;
+      -webkit-appearance: none;
+    }
+
+    button:active { background: #2e5ddf; }
+
+    @media (hover: hover) {
+      button:hover { background: #2e5ddf; }
+    }
+
+    .result-box {
+      margin-top: 24px;
+      background: #f0f4ff;
+      border-radius: 12px;
+      padding: 20px;
+      display: none;
+    }
+
+    .result-box.show { display: block; }
+
+    .result-title {
+      font-size: 0.83rem;
+      color: #7a8599;
+      margin-bottom: 4px;
+    }
+
+    .result-main {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #2e5ddf;
+      margin-bottom: 16px;
+      word-break: break-all;
+    }
+
+    .result-detail {
+      border-top: 1px solid #d1d9e6;
+      padding-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .detail-label {
+      font-size: 0.78rem;
+      color: #7a8599;
+      margin-bottom: 2px;
+    }
+
+    .detail-value {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #1a2233;
+      word-break: break-all;
+    }
+
+    .error {
+      color: #e53e3e;
+      font-size: 0.85rem;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .error.show { display: block; }
+
+    /* iPhoneホーム画面追加の案内 */
+    .add-hint {
+      text-align: center;
+      color: #aab2c0;
+      font-size: 0.75rem;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>💰 一括返済ローン計算機</h1>
+    <p class="subtitle">借入から返済日まで、利息を自動計算します</p>
+
+    <div class="field">
+      <label>元金（借入金額）</label>
+      <div class="input-wrap">
+        <input type="number" id="principal" placeholder="1000000" min="1"
+               inputmode="decimal" autocomplete="off" />
+        <span class="unit">円</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>年利</label>
+      <div class="input-wrap">
+        <input type="number" id="rate" placeholder="3.0" step="0.01" min="0"
+               inputmode="decimal" autocomplete="off" />
+        <span class="unit">%</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>借入日</label>
+      <div class="input-wrap">
+        <input type="date" id="startDate" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>返済日</label>
+      <div class="input-wrap">
+        <input type="date" id="endDate" />
+      </div>
+    </div>
+
+    <button onclick="calculate()">計算する</button>
+
+    <p class="error" id="error"></p>
+
+    <div class="result-box" id="result">
+      <p class="result-title">返済日に支払う合計金額</p>
+      <p class="result-main" id="total"></p>
+      <div class="result-detail">
+        <div class="detail-item">
+          <p class="detail-label">元金</p>
+          <p class="detail-value" id="principalOut"></p>
+        </div>
+        <div class="detail-item">
+          <p class="detail-label">利息合計</p>
+          <p class="detail-value" id="interest"></p>
+        </div>
+        <div class="detail-item">
+          <p class="detail-label">借入期間</p>
+          <p class="detail-value" id="days"></p>
+        </div>
+        <div class="detail-item">
+          <p class="detail-label">実質金利（日割り）</p>
+          <p class="detail-value" id="dailyRate"></p>
+        </div>
+      </div>
+    </div>
+
+    <p class="add-hint">📲 Safariの「共有」→「ホーム画面に追加」でアプリとして使えます</p>
+  </div>
+
+  <script>
+    function fmt(n) {
+      return Math.round(n).toLocaleString('ja-JP') + ' 円';
+    }
+
+    function calculate() {
+      const principal = parseFloat(document.getElementById('principal').value);
+      const rate = parseFloat(document.getElementById('rate').value);
+      const startVal = document.getElementById('startDate').value;
+      const endVal = document.getElementById('endDate').value;
+
+      const err = document.getElementById('error');
+      const result = document.getElementById('result');
+      err.classList.remove('show');
+      result.classList.remove('show');
+
+      if (!principal || isNaN(principal) || principal <= 0) {
+        err.textContent = '元金を正しく入力してください。';
+        err.classList.add('show'); return;
+      }
+      if (isNaN(rate) || rate < 0) {
+        err.textContent = '年利を正しく入力してください。';
+        err.classList.add('show'); return;
+      }
+      if (!startVal) {
+        err.textContent = '借入日を入力してください。';
+        err.classList.add('show'); return;
+      }
+      if (!endVal) {
+        err.textContent = '返済日を入力してください。';
+        err.classList.add('show'); return;
+      }
+
+      // タイムゾーンの影響を避けるためUTCで計算
+      const [sy, sm, sd] = startVal.split('-').map(Number);
+      const [ey, em, ed] = endVal.split('-').map(Number);
+      const start = Date.UTC(sy, sm - 1, sd);
+      const end = Date.UTC(ey, em - 1, ed);
+
+      if (end <= start) {
+        err.textContent = '返済日は借入日より後の日付にしてください。';
+        err.classList.add('show'); return;
+      }
+
+      const dayCount = Math.round((end - start) / (1000 * 60 * 60 * 24));
+
+      // 単利計算: 元金 × 年利 × (日数 / 365)
+      const interestAmount = principal * (rate / 100) * (dayCount / 365);
+      const total = principal + interestAmount;
+
+      document.getElementById('total').textContent = fmt(total);
+      document.getElementById('principalOut').textContent = fmt(principal);
+      document.getElementById('interest').textContent = fmt(interestAmount);
+      document.getElementById('days').textContent = dayCount + ' 日間';
+      document.getElementById('dailyRate').textContent = (rate / 365).toFixed(4) + ' %/日';
+
+      result.classList.add('show');
+      result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Enterキーで計算
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') calculate();
+    });
+  </script>
+</body>
+</html>
